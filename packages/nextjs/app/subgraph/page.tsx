@@ -1,17 +1,68 @@
-export default function SubgraphPage() {
-  // TODO: Fetch data from The Graph API
-  const transfers: any[] = [];
-  const ownershipTransferreds: any[] = [];
-  const approvals: any[] = [];
-  const eip712DomainChangeds: any[] = [];
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { gql, request } from "graphql-request";
+import SubgraphData from "./components/SubgraphData";
 
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+const query = gql`
+  {
+    transfers(first: 10) {
+      id
+      to
+      transactionHash
+      value
+      from
+      blockTimestamp
+      blockNumber
+    }
+    ownershipTransferreds(first: 10) {
+      blockNumber
+      blockTimestamp
+      id
+      newOwner
+      transactionHash
+      previousOwner
+    }
+    approvals(first: 5) {
+      id
+      owner
+      spender
+      value
+      transactionHash
+    }
+    eip712DomainChangeds(first: 5) {
+      id
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;
 
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(parseInt(timestamp) * 1000).toLocaleString();
-  };
+const url = process.env.NEXT_PUBLIC_SUBGRAPH_URL || "";
+const headers: Record<string, string> = process.env.NEXT_PUBLIC_GRAPH_API_KEY
+  ? { Authorization: `Bearer ${process.env.NEXT_PUBLIC_GRAPH_API_KEY}` }
+  : {};
+
+export default async function SubgraphPage() {
+  const queryClient = new QueryClient();
+
+  // Only prefetch if URL is configured
+  if (url) {
+    try {
+      await queryClient.prefetchQuery({
+        queryKey: ["subgraph-data"],
+        async queryFn() {
+          return await request(url, query, {}, headers);
+        },
+      });
+    } catch (error) {
+      // Handle prefetch error silently - will be shown in component
+      console.error("Error prefetching subgraph data:", error);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-base-100">
@@ -31,187 +82,39 @@ export default function SubgraphPage() {
 
       {/* Content Section */}
       <section className="py-16 md:py-24">
-        <div className="container mx-auto px-8 md:px-12 max-w-7xl space-y-12">
-          {/* Transfers Section */}
-          <div className="card bg-base-200 shadow-xl border border-base-300">
-            <div className="card-body p-8">
-              <h2 className="card-title text-3xl mb-6">💸 Transfers</h2>
-              <div className="overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>From</th>
-                      <th>To</th>
-                      <th>Value</th>
-                      <th>Block</th>
-                      <th>Transaction</th>
-                      <th>Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transfers.map((transfer) => (
-                      <tr key={transfer.id}>
-                        <td className="font-mono text-sm">
-                          {formatAddress(transfer.from)}
-                        </td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(transfer.to)}
-                        </td>
-                        <td className="font-semibold">
-                          {(parseInt(transfer.value) / 1e18).toFixed(2)} ETH
-                        </td>
-                        <td>{transfer.blockNumber}</td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(transfer.transactionHash)}
-                        </td>
-                        <td className="text-sm opacity-70">
-                          {formatTimestamp(transfer.blockTimestamp)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {transfers.length === 0 && (
-                <div className="text-center py-8 opacity-60">
-                  <p>No transfers found. Connect a subgraph to see data.</p>
+        <div className="container mx-auto px-8 md:px-12 max-w-7xl">
+          {!url ? (
+            <div className="alert alert-warning shadow-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div>
+                <h3 className="font-bold">Subgraph Not Configured</h3>
+                <div className="text-sm">
+                  Please follow the instructions in{" "}
+                  <code className="bg-base-300 px-2 py-1 rounded">
+                    THEGRAPH.md
+                  </code>{" "}
+                  to deploy your subgraph and configure the environment
+                  variables.
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Ownership Transferred Section */}
-          <div className="card bg-base-200 shadow-xl border border-base-300">
-            <div className="card-body p-8">
-              <h2 className="card-title text-3xl mb-6">
-                👑 Ownership Transfers
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>Previous Owner</th>
-                      <th>New Owner</th>
-                      <th>Block</th>
-                      <th>Transaction</th>
-                      <th>Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ownershipTransferreds.map((transfer) => (
-                      <tr key={transfer.id}>
-                        <td className="font-mono text-sm">
-                          {formatAddress(transfer.previousOwner)}
-                        </td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(transfer.newOwner)}
-                        </td>
-                        <td>{transfer.blockNumber}</td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(transfer.transactionHash)}
-                        </td>
-                        <td className="text-sm opacity-70">
-                          {formatTimestamp(transfer.blockTimestamp)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
-              {ownershipTransferreds.length === 0 && (
-                <div className="text-center py-8 opacity-60">
-                  <p>
-                    No ownership transfers found. Connect a subgraph to see
-                    data.
-                  </p>
-                </div>
-              )}
             </div>
-          </div>
-
-          {/* Approvals Section */}
-          <div className="card bg-base-200 shadow-xl border border-base-300">
-            <div className="card-body p-8">
-              <h2 className="card-title text-3xl mb-6">✅ Approvals</h2>
-              <div className="overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>Owner</th>
-                      <th>Spender</th>
-                      <th>Value</th>
-                      <th>Transaction</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {approvals.map((approval) => (
-                      <tr key={approval.id}>
-                        <td className="font-mono text-sm">
-                          {formatAddress(approval.owner)}
-                        </td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(approval.spender)}
-                        </td>
-                        <td className="font-semibold">
-                          {(parseInt(approval.value) / 1e18).toFixed(2)} ETH
-                        </td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(approval.transactionHash)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {approvals.length === 0 && (
-                <div className="text-center py-8 opacity-60">
-                  <p>No approvals found. Connect a subgraph to see data.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* EIP712 Domain Changed Section */}
-          <div className="card bg-base-200 shadow-xl border border-base-300">
-            <div className="card-body p-8">
-              <h2 className="card-title text-3xl mb-6">
-                🔐 EIP712 Domain Changes
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="table table-zebra w-full">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Block</th>
-                      <th>Transaction</th>
-                      <th>Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {eip712DomainChangeds.map((event) => (
-                      <tr key={event.id}>
-                        <td className="font-mono text-sm">{event.id}</td>
-                        <td>{event.blockNumber}</td>
-                        <td className="font-mono text-sm">
-                          {formatAddress(event.transactionHash)}
-                        </td>
-                        <td className="text-sm opacity-70">
-                          {formatTimestamp(event.blockTimestamp)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {eip712DomainChangeds.length === 0 && (
-                <div className="text-center py-8 opacity-60">
-                  <p>
-                    No domain changes found. Connect a subgraph to see data.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          ) : (
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              <SubgraphData />
+            </HydrationBoundary>
+          )}
         </div>
       </section>
     </div>

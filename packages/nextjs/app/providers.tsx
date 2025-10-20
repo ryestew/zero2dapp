@@ -13,12 +13,16 @@ import {
   sepolia,
   celo as celoMainnet,
 } from "wagmi/chains";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import {
+  isServer,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 // Override Celo mainnet with icon
 const celo = {
   ...celoMainnet,
-  iconUrl: "https://cryptologos.cc/logos/celo-celo-logo.svg?v=029",
+  iconUrl: "https://s2.coinmarketcap.com/static/img/coins/200x200/5567.png",
 };
 
 // Define Celo Alfajores testnet
@@ -41,7 +45,7 @@ const celoAlfajores = defineChain({
       url: "https://celo-alfajores.blockscout.com",
     },
   },
-  iconUrl: "https://cryptologos.cc/logos/celo-celo-logo.svg?v=029",
+  iconUrl: "https://s2.coinmarketcap.com/static/img/coins/200x200/5567.png",
   testnet: true,
 });
 
@@ -65,7 +69,7 @@ const celoSepolia = defineChain({
       url: "https://celo-sepolia.blockscout.com",
     },
   },
-  iconUrl: "https://cryptologos.cc/logos/celo-celo-logo.svg?v=029",
+  iconUrl: "https://s2.coinmarketcap.com/static/img/coins/200x200/5567.png",
   testnet: true,
 });
 
@@ -87,9 +91,38 @@ const config = getDefaultConfig({
   ssr: true,
 });
 
-const queryClient = new QueryClient();
+// React Query setup
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        // With SSR, we usually want to set some default staleTime
+        // above 0 to avoid refetching immediately on the client
+        staleTime: 60 * 1000, // 1 minute
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+function getQueryClient() {
+  if (isServer) {
+    // Server: always make a new query client
+    return makeQueryClient();
+  } else {
+    // Browser: make a new query client if we don't already have one
+    // This is very important, so we don't re-make a new client if React
+    // suspends during the initial render. This may not be needed if we
+    // have a suspense boundary BELOW the creation of the query client
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const queryClient = getQueryClient();
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
