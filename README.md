@@ -1,4 +1,4 @@
-# Zero2Dapp Monorepo
+# ZeroToDapp Monorepo
 
 A monorepo for building decentralized applications with smart contracts, a Next.js frontend, and The Graph subgraph indexing.
 

@@ -1,16 +1,37 @@
 # Next.js Application
 
-This is a [Next.js](https://nextjs.org) project bootstrapped as part of the Zero2Dapp monorepo.
+This is a [Next.js](https://nextjs.org) project bootstrapped as part of the ZeroToDapp monorepo. It includes:
+
+- ⚡ **Next.js 15** with App Router
+- 🎨 **Tailwind CSS** for styling
+- 🔗 **RainbowKit** for wallet connections
+- 🔄 **Wagmi** & **Viem** for Web3 interactions
 
 ## Getting Started
 
-First, install dependencies from the root of the monorepo:
+### 1. Install Dependencies
+
+From the root of the monorepo:
 
 ```bash
 npm install
 ```
 
-Then, run the development server:
+### 2. Set Up WalletConnect (Recommended)
+
+Create a `.env.local` file with your WalletConnect Project ID:
+
+```bash
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
+```
+
+Get your Project ID from [https://cloud.walletconnect.com](https://cloud.walletconnect.com)
+
+See [WALLETCONNECT_SETUP.md](./WALLETCONNECT_SETUP.md) for detailed instructions.
+
+### 3. Run the Development Server
+
+From the root:
 
 ```bash
 npm run dev:nextjs
@@ -24,7 +45,12 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
+
+- **Header with Connect Button**: Click "Connect Wallet" to connect your Web3 wallet
+- **Multi-chain Support**: Ethereum, Polygon, Optimism, Arbitrum, Base, and Sepolia
+- **Responsive Design**: Mobile-friendly layout with Tailwind CSS
+- **Footer**: Links to resources and documentation
 
 ## Learn More
 

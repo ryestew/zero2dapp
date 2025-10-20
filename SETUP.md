@@ -1,4 +1,4 @@
-# Zero2Dapp Monorepo Setup Guide
+# ZeroToDapp Monorepo Setup Guide
 
 ## ✅ What's Been Set Up
 
