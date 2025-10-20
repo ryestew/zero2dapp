@@ -1,0 +1,8 @@
+{
+  "celo-sepolia": {
+    "BuenaToken": {
+      "address": "0xa0304b26DEb6C0D12416F4bDbB09e52e6f800A1F",
+      "startBlock": 7209007
+    }
+  }
+}

@@ -1,0 +1,35 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: BuenaToken
+    network: celo-sepolia
+    source:
+      address: "0xa0304b26DEb6C0D12416F4bDbB09e52e6f800A1F"
+      abi: BuenaToken
+      startBlock: 7209007
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - EIP712DomainChanged
+        - OwnershipTransferred
+        - Transfer
+      abis:
+        - name: BuenaToken
+          file: ./abis/BuenaToken.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: EIP712DomainChanged()
+          handler: handleEIP712DomainChanged
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/buena-token.ts

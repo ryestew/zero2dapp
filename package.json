@@ -1,0 +1,14 @@
+{
+  "name": "zero2dapp",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:nextjs": "npm run dev --workspace=packages/nextjs",
+    "build:nextjs": "npm run build --workspace=packages/nextjs",
+    "dev:subgraph": "npm run dev --workspace=packages/subgraph",
+    "build:subgraph": "npm run build --workspace=packages/subgraph"
+  }
+}
