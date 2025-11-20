@@ -3,11 +3,11 @@ pragma solidity 0.8.28;
 
 import {ERC20} from "@openzeppelin/contracts@5.4.0/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@5.4.0/access/AccessControl.sol";
-import {SelfVerificationRoot} from "@selfxyz/contracts@1.2.3/contracts/abstract/SelfVerificationRoot.sol";
-import {ISelfVerificationRoot} from "@selfxyz/contracts@1.2.3/contracts/interfaces/ISelfVerificationRoot.sol";
-import {IIdentityVerificationHubV2} from "@selfxyz/contracts@1.2.3/contracts/interfaces/IIdentityVerificationHubV2.sol";
-import {SelfStructs} from "@selfxyz/contracts@1.2.3/contracts/libraries/SelfStructs.sol";
-import {SelfUtils} from "@selfxyz/contracts@1.2.3/contracts/libraries/SelfUtils.sol";
+import {SelfVerificationRoot} from "@selfxyz/contracts/contracts/abstract/SelfVerificationRoot.sol";
+import {ISelfVerificationRoot} from "@selfxyz/contracts/contracts/interfaces/ISelfVerificationRoot.sol";
+import {IIdentityVerificationHubV2} from "@selfxyz/contracts/contracts/interfaces/IIdentityVerificationHubV2.sol";
+import {SelfStructs} from "@selfxyz/contracts/contracts/libraries/SelfStructs.sol";
+import {SelfUtils} from "@selfxyz/contracts/contracts/libraries/SelfUtils.sol";
 
 contract BuenoToken is ERC20, AccessControl, SelfVerificationRoot {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
