@@ -1,15 +1,35 @@
 "use client";
 
-import { formatUnits } from "viem";
-import { useAccount, useReadContract } from "wagmi";
+import { formatUnits, http } from "viem";
+import { createConfig, useAccount, useEnsName, useReadContract } from "wagmi";
 import buenoTokenAbi from "../../../subgraph/abis/BuenoToken.json";
 import { useEffect } from "react";
+import { mainnet } from "viem/chains";
 
 const CONTRACT_ADDRESS = process.env
   .NEXT_PUBLIC_BUENO_TOKEN_ADDRESS as `0x${string}`;
 
+const mainnetEnsConfig = createConfig({
+  chains: [mainnet],
+  transports: {
+    [mainnet.id]: http(),
+  },
+  ssr: true,
+});
+
+
 export function TokenBalance() {
   const { address, isConnected } = useAccount();
+  const { data: ensName } = useEnsName({
+    address,
+    chainId: mainnet.id,
+    config: mainnetEnsConfig,
+    query: {
+      enabled: !!address,
+    },
+  });
+
+  console.log(ensName);
 
   // Debug log to see what's happening
   useEffect(() => {
@@ -122,10 +142,10 @@ export function TokenBalance() {
             </div>
 
               {/* Address Display */}
+                <p className="font-inter text-label uppercase mb-2">{ ensName ? "YOUR ENS NAME" : "YOUR ADDRESS" }</p>
               <div className="bg-celo-lt-tan border-2 border-celo-outline p-6">
-                <p className="font-inter text-label uppercase mb-2">YOUR ADDRESS</p>
                 <p className="font-mono text-body-s text-celo-body-copy break-all">
-                  {address}
+                  {ensName || address}
                 </p>
             </div>
           </div>
