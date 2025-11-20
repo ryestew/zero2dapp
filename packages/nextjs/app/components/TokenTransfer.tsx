@@ -4,14 +4,20 @@ import { useState } from "react";
 import { isAddress, parseUnits } from "viem";
 import {
   useAccount,
+  usePublicClient,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 import buenoTokenAbi from "../../../subgraph/abis/BuenoToken.json";
+import { getEnsAddress } from "viem/actions";
+import { normalize } from "viem/ens";
+import { mainnetEnsClient } from "../lib/ensClient";
 
 const CONTRACT_ADDRESS = process.env
   .NEXT_PUBLIC_BUENO_TOKEN_ADDRESS as `0x${string}`;
+
+const hasENSShape = (input: string) => input.includes(".") && input.length > 2;
 
 export function TokenTransfer() {
   const { address, isConnected } = useAccount();
@@ -19,6 +25,8 @@ export function TokenTransfer() {
   const [amount, setAmount] = useState("");
   const [mintAmount, setMintAmount] = useState("");
   const [mintRecipient, setMintRecipient] = useState("");
+
+  // const client = usePublicClient();
 
   const {
     writeContract: transfer,
@@ -56,7 +64,29 @@ export function TokenTransfer() {
       : false;
 
   const handleTransfer = async () => {
-    if (!isAddress(recipient)) {
+    let resolvedRecipient;
+
+    if (hasENSShape(recipient)) {
+      console.log("It does have ENS Shape!", recipient)
+      try {
+        const ensAddress = await getEnsAddress(mainnetEnsClient, {
+          name: normalize(recipient),
+        });
+        if (ensAddress) {
+          resolvedRecipient = ensAddress;
+          console.log("found one", resolvedRecipient)
+        } else {
+          alert("Could not resolve ENS name");
+          return;
+        }
+      } catch (error) {
+        console.error("ENS resolution error:", error);
+        alert("Error resolving ENS name");
+        return;
+      }
+    } else if (isAddress(recipient)) {
+      resolvedRecipient = recipient;
+    } else {
       alert("Please enter a valid address");
       return;
     }
@@ -71,7 +101,7 @@ export function TokenTransfer() {
         address: CONTRACT_ADDRESS,
         abi: buenoTokenAbi as any,
         functionName: "transfer",
-        args: [recipient as `0x${string}`, parseUnits(amount, 2)],
+        args: [resolvedRecipient as `0x${string}`, parseUnits(amount, 2)],
       });
     } catch (error) {
       console.error("Transfer error:", error);
@@ -145,13 +175,13 @@ export function TokenTransfer() {
             <div className="form-control">
               <label className="label pb-2">
                 <span className="label-text font-inter text-label uppercase">
-                  Recipient Address
+                  Recipient Address or ENS Name
                 </span>
               </label>
               <input
                 type="text"
-                placeholder="0x..."
-                className="input border-2 border-celo-outline bg-celo-lt-tan w-full font-mono text-body-m p-4"
+                placeholder="0x... or name.eth"
+                className="input border-2 border-celo-outline bg-celo-lt-tan w-full font-mono text-body-m p-4 text-celo-purple"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 disabled={isTransferPending || isTransferConfirming}
