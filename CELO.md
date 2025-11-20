@@ -356,9 +356,10 @@ Displays the connected wallet's token balance with Celo brand styling:
 ```typescript
 "use client";
 
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import buenoTokenAbi from "../../../../../artifacts/BuenoToken.json";
+import buenoTokenAbi from "../../../subgraph/abis/BuenoToken.json";
+import { useEffect } from "react";
 
 const CONTRACT_ADDRESS = process.env
   .NEXT_PUBLIC_BUENO_TOKEN_ADDRESS as `0x${string}`;
@@ -366,27 +367,40 @@ const CONTRACT_ADDRESS = process.env
 export function TokenBalance() {
   const { address, isConnected } = useAccount();
 
-  const { data: balance, isLoading } = useReadContract({
+  // Debug log to see what's happening
+  useEffect(() => {
+    console.log("Account state:", { address, isConnected });
+  }, [address, isConnected]);
+
+  const { data: balance, isLoading, error: balanceError } = useReadContract({
     address: CONTRACT_ADDRESS,
-    abi: buenoTokenAbi.abi as any,
+    abi: buenoTokenAbi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
     query: {
-      enabled: isConnected && !!address,
+      enabled: !!address,
     },
   });
 
-  const { data: tokenName } = useReadContract({
+  const { data: tokenName, error: nameError } = useReadContract({
     address: CONTRACT_ADDRESS,
-    abi: buenoTokenAbi.abi as any,
+    abi: buenoTokenAbi as any,
     functionName: "name",
   });
 
-  const { data: tokenSymbol } = useReadContract({
+  const { data: tokenSymbol, error: symbolError } = useReadContract({
     address: CONTRACT_ADDRESS,
-    abi: buenoTokenAbi.abi as any,
+    abi: buenoTokenAbi as any,
     functionName: "symbol",
   });
+
+  // Debug logging
+  console.log("Contract Address:", CONTRACT_ADDRESS);
+  console.log("User Address:", address);
+  console.log("Balance:", balance);
+  console.log("Balance Error:", balanceError);
+  console.log("Token Name:", tokenName);
+  console.log("Token Symbol:", tokenSymbol);
 
   if (!isConnected) {
     return (
@@ -414,7 +428,27 @@ export function TokenBalance() {
           <h3 className="font-inter text-2xl font-bold tracking-tight mb-6">
             TOKEN BALANCE
           </h3>
-        {isLoading ? (
+        {!CONTRACT_ADDRESS ? (
+          <div className="alert alert-error p-6">
+            <span className="font-inter text-body-m">
+              Contract address not configured. Please set NEXT_PUBLIC_BUENO_TOKEN_ADDRESS in your .env file.
+            </span>
+          </div>
+        ) : balanceError ? (
+          <div className="alert alert-error p-6">
+            <div className="flex flex-col gap-2">
+              <span className="font-inter text-body-m font-bold">
+                Error loading balance
+              </span>
+              <span className="font-inter text-body-s">
+                {balanceError.message}
+              </span>
+              <span className="font-mono text-xs mt-2">
+                Contract: {CONTRACT_ADDRESS}
+              </span>
+            </div>
+          </div>
+        ) : isLoading ? (
             <div className="flex justify-center items-center py-16">
               <span className="loading loading-spinner loading-lg text-celo-purple"></span>
           </div>
@@ -428,11 +462,11 @@ export function TokenBalance() {
                   </p>
                   <p className="font-alpina text-6xl text-celo-black leading-tight">
                 {balance
-                  ? parseFloat(formatEther(balance as bigint)).toLocaleString(
+                  ? parseFloat(formatUnits(balance as bigint, 2)).toLocaleString(
                       undefined,
                       {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 4,
+                        maximumFractionDigits: 2,
                       }
                     )
                   : "0.00"}
@@ -474,14 +508,14 @@ Allows users to transfer tokens (includes owner-only mint functionality):
 "use client";
 
 import { useState } from "react";
-import { isAddress, parseEther } from "viem";
+import { isAddress, parseUnits } from "viem";
 import {
   useAccount,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import buenoTokenAbi from "../../../../../artifacts/BuenoToken.json";
+import buenoTokenAbi from "../../../subgraph/abis/BuenoToken.json";
 
 const CONTRACT_ADDRESS = process.env
   .NEXT_PUBLIC_BUENO_TOKEN_ADDRESS as `0x${string}`;
@@ -519,7 +553,7 @@ export function TokenTransfer() {
 
   const { data: owner } = useReadContract({
     address: CONTRACT_ADDRESS,
-    abi: buenoTokenAbi.abi as any,
+    abi: buenoTokenAbi as any,
     functionName: "owner",
   });
 
@@ -542,9 +576,9 @@ export function TokenTransfer() {
     try {
       transfer({
         address: CONTRACT_ADDRESS,
-        abi: buenoTokenAbi.abi as any,
+        abi: buenoTokenAbi as any,
         functionName: "transfer",
-        args: [recipient as `0x${string}`, parseEther(amount)],
+        args: [recipient as `0x${string}`, parseUnits(amount, 2)],
       });
     } catch (error) {
       console.error("Transfer error:", error);
@@ -565,9 +599,9 @@ export function TokenTransfer() {
     try {
       mint({
         address: CONTRACT_ADDRESS,
-        abi: buenoTokenAbi.abi as any,
+        abi: buenoTokenAbi as any,
         functionName: "mint",
-        args: [mintRecipient as `0x${string}`, parseEther(mintAmount)],
+        args: [mintRecipient as `0x${string}`, parseUnits(mintAmount, 2)],
       });
     } catch (error) {
       console.error("Mint error:", error);
