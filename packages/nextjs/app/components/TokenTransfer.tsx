@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { isAddress, parseEther } from "viem";
+import { isAddress, parseUnits } from "viem";
 import {
   useAccount,
   useReadContract,
@@ -71,7 +71,7 @@ export function TokenTransfer() {
         address: CONTRACT_ADDRESS,
         abi: buenoTokenAbi as any,
         functionName: "transfer",
-        args: [recipient as `0x${string}`, parseEther(amount)],
+        args: [recipient as `0x${string}`, parseUnits(amount, 2)],
       });
     } catch (error) {
       console.error("Transfer error:", error);
@@ -94,7 +94,7 @@ export function TokenTransfer() {
         address: CONTRACT_ADDRESS,
         abi: buenoTokenAbi as any,
         functionName: "mint",
-        args: [mintRecipient as `0x${string}`, parseEther(mintAmount)],
+        args: [mintRecipient as `0x${string}`, parseUnits(mintAmount, 2)],
       });
     } catch (error) {
       console.error("Mint error:", error);
