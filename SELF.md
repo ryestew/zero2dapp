@@ -10,6 +10,7 @@ Complete guide for integrating Self Protocol identity verification to gate token
 - [What We'll Build](#what-well-build)
 - [Prerequisites](#prerequisites)
 - [Step 1: Install Self Protocol Packages](#step-1-install-self-protocol-packages)
+- [Step 1.5: Redeploy BuenoToken Contract with Self Protocol Integration](#step-15-redeploy-buenotoken-contract-with-self-protocol-integration)
 - [Step 2: Set Up Environment Variables](#step-2-set-up-environment-variables)
 - [Step 3: Create Self Protocol Verification Page](#step-3-create-self-protocol-verification-page)
 - [Step 4: Create Verification Components](#step-4-create-verification-components)
@@ -42,25 +43,97 @@ This integration adds:
 
 ## ✅ Prerequisites
 
-- ✅ BuenoToken contract already deployed on Celo Sepolia
 - ✅ Frontend already set up and working
 - ✅ Contract interaction page (`/contract`) already functional
 - ✅ Self Protocol account (get app name and scope from [Self Protocol](https://self.xyz))
+- ✅ MetaMask wallet with Celo Sepolia testnet configured
+- ✅ Some CELO tokens on Celo Sepolia for gas fees (get from [Celo Sepolia Faucet](https://faucet.celo.org/))
 
 ## 📦 Step 1: Install Self Protocol Packages
 
-Navigate to the Next.js package and install Self Protocol dependencies:
+This project uses Yarn workspaces. Install Self Protocol dependencies from the root:
+
+```bash
+# From the root directory
+yarn workspace nextjs add @selfxyz/qrcode@^1.0.15 @selfxyz/core@^0.0.25 @selfxyz/common@^0.0.8
+```
+
+Or navigate to the Next.js package and install directly:
 
 ```bash
 cd packages/nextjs
-npm install @selfxyz/qrcode @selfxyz/core ethers
+yarn add @selfxyz/qrcode@^1.0.15 @selfxyz/core@^0.0.25 @selfxyz/common@^0.0.8
 ```
 
-Or from the root:
+**Note:** The `@selfxyz/contracts@^1.2.0` package is already installed at the root level for the smart contract compilation. If you need to install it separately, run:
 
 ```bash
-npm install @selfxyz/qrcode @selfxyz/core ethers --workspace=packages/nextjs
+# From the root directory
+yarn add @selfxyz/contracts@^1.2.0
 ```
+
+## 🚀 Step 1.5: Redeploy BuenoToken Contract with Self Protocol Integration
+
+The BuenoToken contract needs to be redeployed with Self Protocol integration. The contract already includes the necessary Self Protocol imports and verification logic.
+
+### Deploy Using Remix IDE
+
+1. **Open Remix IDE**
+   - Go to [Remix IDE](https://remix.ethereum.org/)
+   - Connect your MetaMask wallet
+   - Switch to **Celo Sepolia** testnet
+
+2. **Upload Contract Files and Install Dependencies**
+   - In Remix, go to the "File Explorer" tab
+   - Upload `contracts/BuenoToken.sol`
+   - The contract imports from `@selfxyz/contracts@^1.2.0`
+   - If Remix doesn't automatically resolve the package, you may need to install it:
+     - In Remix, go to the "Solidity Compiler" tab
+     - Click on "Advanced Configurations"
+     - Add `@selfxyz/contracts@^1.2.0` to the dependencies, or
+     - Use Remix's package manager to install: In the terminal, run `npm install @selfxyz/contracts@^1.2.0`
+
+3. **Compile the Contract**
+   - Go to the "Solidity Compiler" tab
+   - Select compiler version `0.8.28` or compatible
+   - Click "Compile BuenoToken.sol"
+   - Ensure compilation succeeds without errors
+
+4. **Deploy the Contract**
+   - Go to the "Deploy & Run Transactions" tab
+   - Select "Injected Provider - MetaMask" as the environment
+   - Make sure you're connected to Celo Sepolia
+   - In the "Deploy" section, you'll need to provide constructor parameters:
+     - `identityVerificationHub`: `0x16ECBA51e18a4a7e61fdC417f0d47AFEeDfbed74` (Celo Sepolia Identity Verification Hub)
+     - `scopeSeed`: `"zero2dapp-verification"` (or your custom scope seed)
+     - `_verificationConfig`: `{ olderThan: 18, forbiddenCountries: [], ofacEnabled: false }`
+   - Click "Deploy"
+   - Confirm the transaction in MetaMask
+   - Wait for deployment confirmation
+
+### Deploy Using Deployment Script
+
+Alternatively, you can use the deployment script:
+
+1. **Upload Scripts to Remix**
+   - Upload `scripts/deploy_with_ethers.ts` to Remix
+   - Upload `scripts/ethers-lib.ts` to Remix
+   - Make sure `artifacts/BuenoToken.json` is available (compile first)
+
+2. **Run the Deployment Script**
+   - The script will automatically:
+     - Use your connected wallet address as the deployer
+     - Deploy with the correct Self Protocol parameters
+     - Display the contract address and next steps
+
+3. **Save the Contract Address**
+   - Copy the deployed contract address
+   - You'll need this for the next step (environment variables)
+
+**Important:** After deployment, you'll need to update:
+- `NEXT_PUBLIC_BUENO_TOKEN_ADDRESS` in `.env.local`
+- `NEXT_PUBLIC_SELF_ENDPOINT` in `.env.local` (should be the same as the contract address)
+- `packages/subgraph/networks.json` if using a subgraph
 
 ## 🔧 Step 2: Set Up Environment Variables
 
@@ -71,17 +144,29 @@ Add Self Protocol configuration to your `.env.local` file in `packages/nextjs/`:
 # Self Protocol Configuration
 # ============================================
 NEXT_PUBLIC_SELF_APP_NAME=ZeroToDapp
-NEXT_PUBLIC_SELF_ENDPOINT=0x22bc4604d67b4e3e15e3e30cc5449de02dbd8192
+NEXT_PUBLIC_SELF_ENDPOINT=<YOUR_DEPLOYED_CONTRACT_ADDRESS>
 NEXT_PUBLIC_SELF_SCOPE_SEED=zero2dapp-verification
+
+# ============================================
+# Contract Configuration
+# ============================================
+NEXT_PUBLIC_BUENO_TOKEN_ADDRESS=<YOUR_DEPLOYED_CONTRACT_ADDRESS>
 ```
+
+**Important Notes:**
+
+- `NEXT_PUBLIC_SELF_ENDPOINT` should be set to your **deployed BuenoToken contract address** (the same as `NEXT_PUBLIC_BUENO_TOKEN_ADDRESS`)
+- Replace `<YOUR_DEPLOYED_CONTRACT_ADDRESS>` with the address you got from Step 1.5
+- The contract address should be in lowercase format
 
 **Getting Your Self Protocol Credentials:**
 
 1. Visit [Self Protocol](https://self.xyz)
 2. Create an account or sign in
 3. Create a new app
-4. Copy your app name and scope
+4. Copy your app name and scope seed
 5. Add them to your `.env.local` file
+6. The `scopeSeed` in your contract deployment must match `NEXT_PUBLIC_SELF_SCOPE_SEED`
 
 ## 📄 Step 3: Create Self Protocol Verification Page
 
@@ -649,37 +734,58 @@ Update `packages/nextjs/app/components/Header.tsx` to add Self verification link
 
 ### Testing Steps
 
-1. **Start the Development Server**
+1. **Verify Contract Deployment**
+   - Ensure your BuenoToken contract is deployed on Celo Sepolia (from Step 1.5)
+   - Verify environment variables are set correctly (from Step 2)
+   - Check that `NEXT_PUBLIC_BUENO_TOKEN_ADDRESS` and `NEXT_PUBLIC_SELF_ENDPOINT` match your deployed contract address
+
+2. **Start the Development Server**
    ```bash
-   npm run dev:nextjs
+   # From the root directory
+   yarn dev:nextjs
+   
+   # Or from packages/nextjs
+   cd packages/nextjs
+   yarn dev
    ```
 
-2. **Connect Your Wallet**
+3. **Connect Your Wallet**
    - Open http://localhost:3000
    - Click "Connect Wallet"
    - Connect to Celo Sepolia network
+   - Ensure you have some CELO tokens for gas fees
 
-3. **Try to Mint (Should Be Blocked)**
-   - Navigate to `/contract` page
-   - Try to mint tokens
-   - Should see "Verification Required" message
-
-4. **Complete Verification**
+4. **Complete Verification First**
    - Navigate to `/self` page
-   - Scan QR code with Self Protocol app
+   - Scan QR code with Self Protocol app (or use the universal link)
    - Complete identity verification
-   - Verify all proofs are provided
+   - Verify all proofs are provided (identity and age 18+)
+   - Wait for the verification transaction to complete
+   - You should automatically receive 100 tokens upon successful verification
 
-5. **Verify On-Chain (Optional)**
-   - If you've deployed a VerificationRegistry contract
-   - Check that your address is marked as verified
+5. **Verify On-Chain Status**
+   - Check that your address is marked as verified in the contract
+   - You can verify this by checking the `hasVerified` mapping on the contract
+   - The verification status should update in the UI
 
-6. **Mint Tokens**
-   - Return to `/contract` page
-   - Mint button should now be enabled
-   - Complete mint transaction
+6. **Test Minting (Owner Only)**
+   - Navigate to `/contract` page
+   - If you're the contract owner, you should be able to mint tokens
+   - The mint function requires the MINTER_ROLE (granted to deployer by default)
 
 ## 🔍 Troubleshooting
+
+### Contract Deployment Issues
+
+**Issue**: Contract deployment fails or constructor parameters are incorrect
+
+**Solutions**:
+- Verify you're connected to Celo Sepolia testnet in MetaMask
+- Ensure you have enough CELO tokens for gas fees
+- Double-check the Identity Verification Hub address: `0x16ECBA51e18a4a7e61fdC417f0d47AFEeDfbed74` (Celo Sepolia)
+- Verify the scope seed matches between contract deployment and environment variables
+- Check that the verification config format is correct: `{ olderThan: 18, forbiddenCountries: [], ofacEnabled: false }`
+- Make sure `@selfxyz/contracts@^1.2.0` package is available in Remix (may need to install via npm in Remix: `npm install @selfxyz/contracts@^1.2.0`)
 
 ### QR Code Not Displaying
 
@@ -705,10 +811,13 @@ Update `packages/nextjs/app/components/Header.tsx` to add Self verification link
 **Issue**: Can't mint even after verifying
 
 **Solutions**:
-- Check that verification status is being stored correctly
+- Check that verification status is being stored correctly on-chain
 - Verify `useSelfVerification` hook is returning correct status
-- Check that verification contract address is set in environment variables
+- Check that `NEXT_PUBLIC_BUENO_TOKEN_ADDRESS` and `NEXT_PUBLIC_SELF_ENDPOINT` are set to your deployed contract address
+- Verify the contract address is correct and the contract is deployed
+- Check that `hasVerified` mapping in the contract returns `true` for your address
 - Refresh the page to reload verification status
+- Ensure the contract was deployed with Self Protocol integration (not the old version)
 
 ### Self Protocol App Not Connecting
 
@@ -759,15 +868,23 @@ After completing this integration:
 
 Use this checklist to verify your integration:
 
-- [ ] Self Protocol packages installed
-- [ ] Environment variables configured
+- [ ] Self Protocol packages installed with correct versions:
+  - [ ] `@selfxyz/qrcode@^1.0.15`
+  - [ ] `@selfxyz/core@^0.0.25`
+  - [ ] `@selfxyz/common@^0.0.8`
+  - [ ] `@selfxyz/contracts@^1.2.0` (at root level)
+- [ ] BuenoToken contract redeployed with Self Protocol integration
+- [ ] Contract address saved and environment variables updated
+- [ ] Environment variables configured (`NEXT_PUBLIC_SELF_APP_NAME`, `NEXT_PUBLIC_SELF_ENDPOINT`, `NEXT_PUBLIC_SELF_SCOPE_SEED`, `NEXT_PUBLIC_BUENO_TOKEN_ADDRESS`)
 - [ ] Verification page created (`/self`)
-- [ ] Verification components working
-- [ ] Mint function gated behind verification
-- [ ] Navigation link added
+- [ ] Verification components working (`SelfVerification`, `VerificationStatus`, `ProofRequirements`)
+- [ ] Verification hook created (`useSelfVerification`)
+- [ ] Mint function gated behind verification (if applicable)
+- [ ] Navigation link added to header
 - [ ] QR code displays correctly
-- [ ] Verification flow completes
-- [ ] Mint works after verification
+- [ ] Verification flow completes successfully
+- [ ] Tokens automatically minted upon verification (100 tokens)
+- [ ] On-chain verification status checked correctly
 - [ ] Error handling implemented
 
 Happy building! 🎉
