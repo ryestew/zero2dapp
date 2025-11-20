@@ -180,12 +180,30 @@ After successful deployment:
    yarn dev
    ```
 
-3. **Test Contract Interaction**
+3. **Mint Some Test Tokens (Remix)**
+
+   After deployment, mint tokens to test:
+   
+   - In Remix, under "Deployed Contracts", find your BuenoToken
+   - Expand the `mint` function
+   - Enter:
+     - `to`: your wallet address
+     - `amount`: `100000` (this equals 1000 tokens with 2 decimals)
+   - Click "transact" and confirm in MetaMask
+   
+   **Important:** BuenoToken uses 2 decimals, so:
+   - To mint 1 token: enter `100`
+   - To mint 10 tokens: enter `1000`
+   - To mint 100 tokens: enter `10000`
+   - To mint 1000 tokens: enter `100000`
+
+4. **Test Contract Interaction**
 
    - Visit `http://localhost:3000/contract`
    - Connect your wallet
-   - Check that your token balance displays
-   - Try transferring tokens to another address
+   - Check that your token balance displays correctly
+   - Try transferring tokens to another address (e.g., 10.50 tokens)
+   - Verify the balance updates
 
 4. **Optional: Deploy Subgraph**
 
@@ -226,6 +244,42 @@ After successful deployment:
 - Try a different browser
 - Ensure MetaMask is unlocked
 
+## 💡 Understanding Token Decimals
+
+BuenoToken uses **2 decimals** (not the standard 18). This affects how you work with amounts:
+
+### In Remix (when calling contract functions):
+
+| Tokens You Want | Amount to Enter in Remix |
+|-----------------|--------------------------|
+| 0.01 tokens     | `1`                      |
+| 1 token         | `100`                    |
+| 10 tokens       | `1000`                   |
+| 100 tokens      | `10000`                  |
+| 1000 tokens     | `100000`                 |
+
+### Example: Minting Tokens
+
+**Scenario:** You want to mint 500 tokens to your address
+
+1. In Remix, under "Deployed Contracts", expand the `mint` function
+2. Enter:
+   - `to`: `0xYourWalletAddress`
+   - `amount`: `50000` (500 tokens × 100)
+3. Click "transact"
+4. Confirm in MetaMask
+
+**Calculation:** `Desired Tokens × 100 = Amount to Enter`
+
+### Why 2 Decimals?
+
+Most tokens use 18 decimals to match ETH, but 2 decimals work better for tokens that represent:
+- Currency (like cents in dollars)
+- Percentage values
+- Simple counting scenarios
+
+For detailed examples and frontend code, see `CELO_TOKEN_GUIDE.md`.
+
 ## 📚 Additional Resources
 
 - [Remix Documentation](https://remix-ide.readthedocs.io/)
@@ -233,4 +287,5 @@ After successful deployment:
 - [MetaMask Documentation](https://docs.metamask.io/)
 - [Celo Block Explorer](https://celo.blockscout.com/)
 - [Solidity Documentation](https://docs.soliditylang.org/)
+- [BuenoToken Decimal Guide](./CELO_TOKEN_GUIDE.md) - Complete guide for working with 2 decimals
 
