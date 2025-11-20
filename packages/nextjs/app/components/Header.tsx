@@ -28,6 +28,9 @@ export function Header() {
             <Link href="/subgraph">Subgraph</Link>
           </li>
           <li>
+            <Link href="/contract">Contract</Link>
+          </li>
+          <li>
             <a
               href="https://www.zerotodapp.xyz/"
               target="_blank"

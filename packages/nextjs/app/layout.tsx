@@ -1,7 +1,14 @@
 import { Providers } from "./providers";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata = {
   title: "ZeroToDapp",
@@ -14,8 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="en" className={`h-full ${inter.variable}`} suppressHydrationWarning>
       <head>
+        {/* GT Alpina font - Add your font file or use a CDN */}
+        <link rel="preconnect" href="https://fonts.cdnfonts.com" />
+        <link href="https://fonts.cdnfonts.com/css/gt-alpina" rel="stylesheet" />
+        
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -38,7 +49,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="h-full flex flex-col">
+      <body className={`h-full flex flex-col ${inter.className}`}>
         <Providers>
           <Header />
           <main className="flex-1 w-full overflow-x-hidden pb-20">
