@@ -22,4 +22,3 @@ contract BuenoToken is ERC20, AccessControl {
     	return 2;
 	} 
 }
-
