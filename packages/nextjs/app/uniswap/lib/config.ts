@@ -1,0 +1,10 @@
+export const BUENO_TOKEN = process.env.NEXT_PUBLIC_BUENO_TOKEN_ADDRESS || "";
+export const CELO_TOKEN = process.env.NEXT_PUBLIC_CELO_TOKEN_ADDRESS || "0x471EcE3750Da237f93B8E339c536989b8978a438";
+export const QUOTER_ADDRESS = process.env.NEXT_PUBLIC_QUOTER_ADDRESS || "0x28566da1093609182dff2cb2a91cfd72e61d66cd";
+export const UNIVERSAL_ROUTER = process.env.NEXT_PUBLIC_UNIVERSAL_ROUTER_ADDRESS || "0xcb695bc5d3aa22cad1e6df07801b061a05a0233a";
+export const PERMIT2_ADDRESS = process.env.NEXT_PUBLIC_PERMIT2_ADDRESS || "";
+export const FEE_TIER = parseInt(process.env.NEXT_PUBLIC_POOL_FEE_TIER || "3000");
+export const TICK_SPACING = parseInt(process.env.NEXT_PUBLIC_POOL_TICK_SPACING || "60");
+export const HOOKS = process.env.NEXT_PUBLIC_HOOKS_ADDRESS || "0x0000000000000000000000000000000000000000";
+export const STATE_VIEW_ADDRESS = process.env.NEXT_PUBLIC_STATE_VIEW_ADDRESS || "0xbc21f8720babf4b20d195ee5c6e99c52b76f2bfb";
+export const POOL_ID = parseInt(process.env.NEXT_PUBLIC_POOL_ID || "106");

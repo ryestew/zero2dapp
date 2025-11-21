@@ -1,0 +1,4 @@
+- Project name: zero2dapp-esteban
+- Link to your Fork/ branch: https://github.com/estebansant/zero2dapp-esteban
+- Workshops integrated: Remix, The Graph, Celo, Chainlink, ENS and tried to do Uniswap but not fully completed (found a bug in it) 
+- Feedback: Sadly many people got lost at the beginnning trying to create a smart contract. I think understanding how everything worked and the correlations between the tools was the most diffcult part.

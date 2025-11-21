@@ -794,7 +794,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/BuenaToken.sol": "MyToken"
+			"contracts/BuenoToken.sol": "MyToken"
 		},
 		"evmVersion": "prague",
 		"libraries": {},
@@ -968,7 +968,7 @@
 				"dweb:/ipfs/QmVUSvooZKEdEdap619tcJjTLcAuH6QBdZqAzWwnAXZAWJ"
 			]
 		},
-		"contracts/BuenaToken.sol": {
+		"contracts/BuenoToken.sol": {
 			"keccak256": "0x5b3c78ab40c3421bd5691490ee94758b7110827711777b6d6dc9dbb9ec73d97c",
 			"license": "MIT",
 			"urls": [

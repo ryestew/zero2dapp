@@ -1,0 +1,19 @@
+{
+  "name": "zero2dapp-esteban",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:nextjs": "npm run dev --workspace=packages/nextjs",
+    "build:nextjs": "npm run build --workspace=packages/nextjs",
+    "dev:subgraph": "npm run dev --workspace=packages/subgraph",
+    "build:subgraph": "npm run build --workspace=packages/subgraph"
+  },
+  "packageManager": "yarn@3.2.3+sha512.f26f951f67de0c6a33ee381e5ff364709c87e70eb5e65c694e4facde3512f1fa80b8679e6ba31ce7d340fbb46f08dd683af9457e240f25a204be7427940d767e",
+  "dependencies": {
+    "@uniswap/sdk-core": "^7.9.0",
+    "@uniswap/universal-router-sdk": "^4.23.0"
+  }
+}

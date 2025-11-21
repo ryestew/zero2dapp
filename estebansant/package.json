@@ -1,0 +1,24 @@
+{
+  "name": "estebansant",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ estebansant",
+    "create-local": "graph create --node http://localhost:8020/ estebansant",
+    "remove-local": "graph remove --node http://localhost:8020/ estebansant",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 estebansant",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.91.1",
+    "@graphprotocol/graph-ts": "0.37.0",
+    "@uniswap/sdk-core": "^7.9.0",
+    "@uniswap/universal-router-sdk": "^3.0.3",
+    "@uniswap/v4-sdk": "^1.23.0",
+    "viem": "^2.39.3"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.6.0"
+  }
+}

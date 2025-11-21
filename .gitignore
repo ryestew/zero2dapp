@@ -1,6 +1,6 @@
 # Dependencies
-/node_modules
-/artifacts
+node_modules/
+artifacts/
 .pnp
 .pnp.js
 

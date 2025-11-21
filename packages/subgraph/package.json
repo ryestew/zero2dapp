@@ -1,0 +1,21 @@
+{
+  "name": "buenotoken",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ buenotoken",
+    "create-local": "graph create --node http://localhost:8020/ buenotoken",
+    "remove-local": "graph remove --node http://localhost:8020/ buenotoken",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 buenotoken",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.98.1",
+    "@graphprotocol/graph-ts": "0.37.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.6.0"
+  },
+  "packageManager": "yarn@3.2.3+sha512.f26f951f67de0c6a33ee381e5ff364709c87e70eb5e65c694e4facde3512f1fa80b8679e6ba31ce7d340fbb46f08dd683af9457e240f25a204be7427940d767e"
+}

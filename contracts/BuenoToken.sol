@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.27;
+pragma solidity 0.8.30;
 
 import {ERC20} from "@openzeppelin/contracts@5.4.0/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@5.4.0/access/AccessControl.sol";
@@ -8,7 +8,7 @@ contract BuenoToken is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     constructor()
-        ERC20("BuenoToken", "BTK")
+        ERC20("EstebanToken", "ETK")
     {
     	_grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     	_grantRole(MINTER_ROLE, msg.sender);        
